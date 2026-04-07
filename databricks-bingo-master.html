@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Databricks Bingo — Bingo Master</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --db-red: #FF3621;
+    --db-dark: #1B3139;
+    --db-gray: #F5F5F5;
+    --db-white: #FFFFFF;
+    --db-green: #2EA44F;
+    --db-red-light: #FFE8E5;
+    --db-green-light: #DCFFE4;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+    background: var(--db-gray);
+    color: var(--db-dark);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--db-dark);
+    color: var(--db-white);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  header h1 { font-size: 1.25rem; font-weight: 700; }
+  header .badge {
+    background: var(--db-red);
+    color: white;
+    font-size: 0.75rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  header .back-btn {
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  header .back-btn:hover { background: rgba(255,255,255,0.1); }
+
+  /* ── Landing ── */
+  #landing {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    text-align: center;
+    padding: 32px;
+  }
+  #landing h1 { font-size: 2.5rem; color: var(--db-dark); margin-bottom: 8px; }
+  #landing .subtitle { font-size: 1.1rem; color: #666; margin-bottom: 32px; max-width: 500px; }
+  #landing .rules {
+    background: var(--db-white);
+    border-radius: var(--radius);
+    padding: 24px 32px;
+    text-align: left;
+    max-width: 520px;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow);
+    line-height: 1.6;
+  }
+  #landing .rules h3 { margin-bottom: 12px; color: var(--db-red); }
+  #landing .rules ol { padding-left: 20px; }
+  #landing .rules li { margin-bottom: 6px; }
+  .btn-group { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+  .btn:active { transform: translateY(0); }
+  .btn-primary { background: var(--db-red); color: white; }
+  .btn-secondary { background: var(--db-dark); color: white; }
+  .btn-outline {
+    background: transparent;
+    border: 2px solid var(--db-dark);
+    color: var(--db-dark);
+  }
+  .btn-sm { padding: 8px 16px; font-size: 0.85rem; }
+
+  /* ── Master Layout ── */
+  #master { display: none; }
+  .master-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 24px;
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  @media (max-width: 860px) {
+    .master-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── Question Card ── */
+  .question-area { display: flex; flex-direction: column; gap: 20px; }
+
+  .progress-bar-container {
+    background: #ddd;
+    border-radius: 20px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--db-red);
+    border-radius: 20px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-text {
+    font-size: 0.85rem;
+    color: #888;
+    text-align: right;
+    margin-bottom: 4px;
+  }
+
+  .question-card {
+    background: var(--db-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 32px;
+    text-align: center;
+    position: relative;
+    perspective: 800px;
+  }
+  .question-card .q-number {
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    font-size: 0.8rem;
+    color: #aaa;
+    font-weight: 600;
+  }
+  .question-card .q-text {
+    font-size: 1.35rem;
+    line-height: 1.5;
+    max-width: 550px;
+  }
+  .question-card .a-text {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--db-red);
+    animation: flipIn 0.4s ease;
+  }
+  @keyframes flipIn {
+    0% { transform: rotateX(-90deg); opacity: 0; }
+    100% { transform: rotateX(0); opacity: 1; }
+  }
+
+  .question-controls {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .done-message {
+    text-align: center;
+    padding: 40px;
+    background: var(--db-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .done-message h2 { margin-bottom: 8px; }
+
+  /* ── Sidebar ── */
+  .sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+  .called-list-panel {
+    background: var(--db-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    max-height: 400px;
+    display: flex;
+    flex-direction: column;
+  }
+  .called-list-panel h3 { font-size: 0.95rem; margin-bottom: 12px; color: #666; }
+  .called-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .called-chip {
+    background: var(--db-red-light);
+    color: var(--db-dark);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    animation: fadeSlide 0.3s ease;
+  }
+  @keyframes fadeSlide {
+    0% { opacity: 0; transform: translateY(-8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Verify Panel ── */
+  .verify-panel {
+    background: var(--db-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+  }
+  .verify-panel h3 { font-size: 0.95rem; margin-bottom: 12px; color: #666; }
+  .verify-search {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+  }
+  .verify-search:focus { outline: none; border-color: var(--db-red); }
+  .verify-list {
+    max-height: 280px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 12px;
+  }
+  .verify-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .verify-item:hover { background: #f0f0f0; }
+  .verify-item input[type="checkbox"] {
+    accent-color: var(--db-red);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+  .verify-item.was-called { color: var(--db-dark); }
+  .verify-item.not-called { color: #999; }
+  .verify-item .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .verify-item .status-dot.green { background: var(--db-green); }
+  .verify-item .status-dot.red { background: var(--db-red); }
+
+  .verify-result {
+    text-align: center;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    display: none;
+  }
+  .verify-result.valid {
+    display: block;
+    background: var(--db-green-light);
+    color: var(--db-green);
+    animation: popIn 0.3s ease;
+  }
+  .verify-result.invalid {
+    display: block;
+    background: var(--db-red-light);
+    color: var(--db-red);
+    animation: shake 0.4s ease;
+  }
+  @keyframes popIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  .verify-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .verify-controls .btn { flex: 1; justify-content: center; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    #landing h1 { font-size: 1.8rem; }
+    .master-grid { padding: 16px; gap: 16px; }
+    .question-card { padding: 24px 20px; min-height: 220px; }
+    .question-card .q-text { font-size: 1.1rem; }
+    .question-card .a-text { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════ LANDING SCREEN ════════ -->
+<div id="landing">
+  <h1>Databricks Bingo</h1>
+  <p class="subtitle">A team training game to learn Databricks features. The Bingo Master reads scenarios aloud — players identify the feature!</p>
+  <div class="rules">
+    <h3>How to Play</h3>
+    <ol>
+      <li>The <strong>Bingo Master</strong> reads scenario questions aloud to the group.</li>
+      <li>After the group discusses, the Master reveals the Databricks feature answer.</li>
+      <li><strong>Players</strong> check if that feature is on their card and mark it.</li>
+      <li>First player to mark <strong>5 in a row</strong> (horizontal, vertical, or diagonal) calls <strong>"BINGO!"</strong></li>
+      <li>The Master verifies the claim using the built-in verify tool.</li>
+    </ol>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-primary" onclick="startMaster()">I'm the Bingo Master</button>
+    <a href="databricks-bingo-player.html" class="btn btn-secondary" style="text-decoration:none;">I'm a Player</a>
+  </div>
+</div>
+
+<!-- ════════ MASTER VIEW ════════ -->
+<div id="master">
+  <header>
+    <h1>Databricks Bingo</h1>
+    <span class="badge">BINGO MASTER</span>
+    <button class="back-btn" onclick="backToLanding()">Back</button>
+  </header>
+
+  <div class="master-grid">
+    <!-- Left: Question Area -->
+    <div class="question-area">
+      <div>
+        <div class="progress-text" id="progressText">0 of ? questions</div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <div class="question-card" id="questionCard">
+        <span class="q-number" id="qNumber"></span>
+        <div id="qContent">
+          <div class="q-text">Press "Next Question" to begin!</div>
+        </div>
+      </div>
+
+      <div class="question-controls" id="questionControls">
+        <button class="btn btn-primary" id="revealBtn" onclick="revealAnswer()" disabled>Reveal Answer</button>
+        <button class="btn btn-secondary" id="nextBtn" onclick="nextQuestion()">Next Question</button>
+        <button class="btn btn-outline btn-sm" onclick="resetMaster()">Restart</button>
+      </div>
+    </div>
+
+    <!-- Right: Sidebar -->
+    <div class="sidebar">
+      <div class="called-list-panel">
+        <h3>Called Answers (<span id="calledCount">0</span>)</h3>
+        <div class="called-list" id="calledList">
+          <span style="color:#aaa; font-size:0.85rem;">No answers called yet</span>
+        </div>
+      </div>
+
+      <div class="verify-panel">
+        <h3>Verify Bingo</h3>
+        <input type="text" class="verify-search" id="verifySearch" placeholder="Search features..." oninput="filterVerifyList()">
+        <div class="verify-list" id="verifyList"></div>
+        <div class="verify-result" id="verifyResult"></div>
+        <div class="verify-controls">
+          <button class="btn btn-primary btn-sm" onclick="checkVerify()">Verify</button>
+          <button class="btn btn-outline btn-sm" onclick="clearVerify()">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="questions.js"></script>
+<script>
+
+// ── State ──
+let masterState = {
+  questionOrder: [],
+  currentIndex: -1,
+  calledAnswers: new Set(),
+  answerRevealed: false
+};
+
+// ── Utility ──
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── Navigation ──
+function startMaster() {
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('master').style.display = 'block';
+  initMaster();
+}
+
+function backToLanding() {
+  document.getElementById('master').style.display = 'none';
+  document.getElementById('landing').style.display = 'flex';
+}
+
+// ── Master Logic ──
+function initMaster() {
+  masterState.questionOrder = shuffle([...Array(QUESTIONS.length).keys()]);
+  masterState.currentIndex = -1;
+  masterState.calledAnswers = new Set();
+  masterState.answerRevealed = false;
+  updateProgress();
+  renderCalledList();
+  buildVerifyList();
+  document.getElementById('qContent').innerHTML = '<div class="q-text">Press "Next Question" to begin!</div>';
+  document.getElementById('qNumber').textContent = '';
+  document.getElementById('revealBtn').disabled = true;
+  document.getElementById('nextBtn').disabled = false;
+}
+
+function resetMaster() {
+  if (confirm('Restart the game? This will reset all progress.')) {
+    initMaster();
+  }
+}
+
+function nextQuestion() {
+  if (masterState.currentIndex + 1 >= QUESTIONS.length) return;
+
+  masterState.currentIndex++;
+  masterState.answerRevealed = false;
+  const idx = masterState.questionOrder[masterState.currentIndex];
+  const item = QUESTIONS[idx];
+
+  document.getElementById('qNumber').textContent = `Question ${masterState.currentIndex + 1}`;
+  document.getElementById('qContent').innerHTML = `<div class="q-text">${item.q}</div>`;
+
+  document.getElementById('revealBtn').disabled = false;
+  document.getElementById('nextBtn').disabled = true;
+  updateProgress();
+}
+
+function revealAnswer() {
+  if (masterState.answerRevealed) return;
+  masterState.answerRevealed = true;
+
+  const idx = masterState.questionOrder[masterState.currentIndex];
+  const item = QUESTIONS[idx];
+  const answers = Array.isArray(item.a) ? item.a : [item.a];
+  answers.forEach(a => masterState.calledAnswers.add(a));
+
+  const contentEl = document.getElementById('qContent');
+  contentEl.innerHTML = `
+    <div class="q-text" style="font-size:1rem; color:#888; margin-bottom:16px;">${item.q}</div>
+    <div class="a-text">${answers.join(' / ')}</div>
+  `;
+
+  document.getElementById('revealBtn').disabled = true;
+  const isLast = masterState.currentIndex + 1 >= QUESTIONS.length;
+  document.getElementById('nextBtn').disabled = isLast;
+
+  if (isLast) {
+    document.getElementById('nextBtn').textContent = 'All Done!';
+  }
+
+  updateProgress();
+  renderCalledList();
+  updateVerifyStatuses();
+}
+
+function updateProgress() {
+  const asked = masterState.currentIndex + 1;
+  const total = QUESTIONS.length;
+  const pct = total > 0 ? (Math.max(0, asked) / total) * 100 : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${Math.max(0, asked)} of ${total} questions`;
+}
+
+function renderCalledList() {
+  const container = document.getElementById('calledList');
+  const called = [...masterState.calledAnswers];
+  if (called.length === 0) {
+    container.innerHTML = '<span style="color:#aaa; font-size:0.85rem;">No answers called yet</span>';
+  } else {
+    container.innerHTML = called.map(a => `<div class="called-chip">${a}</div>`).join('');
+    container.scrollTop = container.scrollHeight;
+  }
+  document.getElementById('calledCount').textContent = called.length;
+}
+
+// ── Verify Logic ──
+let verifyChecked = new Set();
+
+function buildVerifyList() {
+  verifyChecked = new Set();
+  renderVerifyList();
+}
+
+function renderVerifyList(filter = '') {
+  const container = document.getElementById('verifyList');
+  const lowerFilter = filter.toLowerCase();
+  const filtered = ALL_FEATURES.filter(f => f.toLowerCase().includes(lowerFilter));
+
+  container.innerHTML = filtered.map(feature => {
+    const isCalled = masterState.calledAnswers.has(feature);
+    const isChecked = verifyChecked.has(feature);
+    return `
+      <label class="verify-item ${isCalled ? 'was-called' : 'not-called'}">
+        <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleVerify('${feature.replace(/'/g, "\\'")}', this.checked)">
+        <span>${feature}</span>
+        <span class="status-dot" id="dot-${feature.replace(/[^a-zA-Z0-9]/g, '_')}" style="display:none;"></span>
+      </label>
+    `;
+  }).join('');
+}
+
+function filterVerifyList() {
+  const query = document.getElementById('verifySearch').value;
+  renderVerifyList(query);
+}
+
+function toggleVerify(feature, checked) {
+  if (checked) verifyChecked.add(feature);
+  else verifyChecked.delete(feature);
+}
+
+function updateVerifyStatuses() {
+  // Re-render to reflect any new called answers
+  const query = document.getElementById('verifySearch').value;
+  renderVerifyList(query);
+}
+
+function checkVerify() {
+  if (verifyChecked.size === 0) {
+    alert('Check off the features the player claims to have!');
+    return;
+  }
+
+  if (verifyChecked.size < 5) {
+    alert('A Bingo line needs exactly 5 squares (including the free space). Check at least 4 features plus the free center.');
+    return;
+  }
+
+  let allValid = true;
+  const resultEl = document.getElementById('verifyResult');
+
+  // Show dots
+  verifyChecked.forEach(feature => {
+    const dotId = 'dot-' + feature.replace(/[^a-zA-Z0-9]/g, '_');
+    const dot = document.getElementById(dotId);
+    if (dot) {
+      dot.style.display = 'inline-block';
+      if (masterState.calledAnswers.has(feature)) {
+        dot.className = 'status-dot green';
+      } else {
+        dot.className = 'status-dot red';
+        allValid = false;
+      }
+    }
+  });
+
+  if (allValid) {
+    resultEl.className = 'verify-result valid';
+    resultEl.textContent = 'VALID BINGO!';
+  } else {
+    resultEl.className = 'verify-result invalid';
+    resultEl.textContent = 'INVALID — some features were not called';
+  }
+}
+
+function clearVerify() {
+  verifyChecked = new Set();
+  document.getElementById('verifyResult').className = 'verify-result';
+  document.getElementById('verifyResult').textContent = '';
+  document.getElementById('verifySearch').value = '';
+  renderVerifyList();
+}
+</script>
+
+</body>
+</html>
