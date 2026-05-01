@@ -416,7 +416,63 @@
   </div>
 </div>
 
-<script src="questions.js?v=20260501115830"></script>
+<script>
+// BAKED FROM questions.js — edit questions.js then run ./bake.sh
+// ── Databricks Bingo — Single Source of Truth ──
+// Edit features HERE. All three HTML files import this file.
+// After editing, open tests.html in a browser to validate.
+
+const QUESTIONS = [
+  { q: "New CSV files keep landing in your S3 bucket and you need to process them incrementally", a: "Auto Loader" },
+  { q: "A business analyst wants to ask questions about sales data in plain English", a: "Genie Spaces" },
+  { q: "You need to share data securely with an external partner who doesn't use Databricks", a: "Delta Sharing" },
+  { q: "Two companies want to collaborate on sensitive data without either party seeing the raw records", a: "Clean Rooms" },
+  { q: "You want to track exactly how data flows from raw ingestion to a final dashboard", a: "Data Lineage" },
+  { q: "You need to deploy a custom ML model as a REST API endpoint", a: "Databricks Model Serving" },
+  { q: "You want to experiment with different LLM prompts before building an application", a: "Agent Bricks AI Playground" },
+  { q: "You need a fully managed GPU for training a deep learning model without managing infrastructure", a: "Databricks AI Runtime" },
+  { q: "You want to build a data pipeline that automatically handles dependencies between tables", a: "Spark Declarative Pipelines" },
+  { q: "You need to orchestrate a workflow that runs a notebook, then a SQL query, then a model training job", a: "Lakeflow Jobs" },
+  { q: "You want to ingest data from Salesforce into your lakehouse", a: "Lakeflow Connect" },
+  { q: "You need to run SQL analytics queries with optimized compute", a: "SQL Warehouse" },
+  { q: "You want to quickly build a dashboard from query results with AI-assisted authoring", a: "AI/BI Dashboards" },
+  { q: "You want to push a query down to a foreign database via JDBC", a: "Query Federation" },
+  { q: "You want to access foreign tables directly from object storage using only Databricks compute", a: "Catalog Federation" },
+  { q: "You need to log experiments, compare model metrics, and manage model versions", a: "MLflow" },
+  { q: "You want to build an ML model quickly without writing much code", a: "AutoML" },
+  { q: "You need to store and reuse feature transformations across multiple ML models", a: "Feature Store" },
+  { q: "You want to centrally manage access controls, lineage, and discovery for all data assets", a: "Unity Catalog" },
+  { q: "You need to ensure ACID transactions on your data lake files", a: "Delta Lake" },
+  { q: "You want to use an open table format that supports schema evolution and time travel, compatible with other engines", a: ["Delta Lake", "Apache Iceberg"] },
+  { q: "You need to monitor workspace usage, audit logs, and compute costs", a: "System Tables" },
+  { q: "You need to deploy a large pre-trained LLM for your team to use", a: "Agent Bricks Foundation Model API" },
+  { q: "You want to store embedding vectors for semantic search in your AI application", a: "Vector Search" },
+  { q: "You need to build an AI agent that automates multi-step enterprise workflows", a: "Agent Bricks Custom Agents" },
+  { q: "You want to benchmark how well your AI agent performs on test cases", a: "MLflow on Databricks" },
+  { q: "You need a unified control point to manage access to all deployed models and agents", a: "Unity AI Gateway" },
+  { q: "You need to capture and monitor all inputs/outputs from your production model", a: "Inference Tables" },
+  { q: "You want to write and collaborate on code with teammates in a notebook that supports Python, SQL, and Scala", a: "Databricks Notebooks" },
+  { q: "You want AI to help you write, debug, and optimize your code and queries", a: "Genie Code" },
+  { q: "You need to migrate legacy data warehouse workloads to Databricks", a: "Lakebridge" },
+  { q: "You want pre-built templates to jumpstart common analytics use cases", a: "Solution Accelerators" },
+  { q: "You need to find and acquire third-party datasets", a: "Databricks Marketplace" },
+  { q: "You want to connect your Databricks workspace to a partner tool like Fivetran or dbt", a: "Partner Connect" },
+  { q: "You need to automatically detect unusual patterns in your data quality metrics", a: "Anomaly Detection" },
+  { q: "You want to apply standardized metadata labels to sensitive data columns for compliance", a: "Governed Tags" },
+  { q: "You need to automatically identify and label PII and other sensitive data types", a: "Data Classification" },
+  { q: "You need to define reusable business KPIs that stay consistent across dashboards and reports", a: "Metric Views" },
+  { q: "You want to build and deploy a secure data app directly on Databricks without separate infrastructure", a: "Databricks Apps" },
+  { q: "You need on-demand compute that automatically scales without provisioning clusters", a: "Serverless" },
+  { q: "You need to create and manage a transactional Postgres database inside Databricks", a: "Lakebase" },
+  { q: "You want a streamlined UI for workspace users to access dashboards and apps without creating content", a: "Genie" },
+  { q: "You need reusable building blocks to quickly assemble AI agent workflows", a: "Agent Bricks" },
+  { q: "You need to coordinate multiple specialized AI agents to handle a complex multi-step request", a: "Agent Bricks Supervisor Agent" },
+  { q: "You need to extract structured fields from a large batch of PDF invoices", a: "Databricks Document Intelligence" },
+];
+
+// Flatten answers (some questions accept multiple answers) into a unique sorted list
+const ALL_FEATURES = [...new Set(QUESTIONS.flatMap(q => Array.isArray(q.a) ? q.a : [q.a]))].sort((a, b) => a.localeCompare(b));
+</script>
 <script>
 
 // ── State ──
