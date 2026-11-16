@@ -23,7 +23,7 @@ Each player gets a unique 5x5 board every time they load the page. No accounts, 
 
 ## Features
 
-- **43 scenario questions** mapped to unique Databricks platform features
+- **42 scenario questions** mapped to unique Databricks platform features
 - **Randomized cards** — each player gets a different 5x5 layout (24 features + FREE center)
 - **Bingo detection** — automatically checks all rows, columns, and diagonals
 - **Verification tool** — Master can confirm claimed bingo squares were actually called
